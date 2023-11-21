@@ -32,8 +32,6 @@ RUN set -eux; \
 		xclip \
 		python3 \
 		python3-pip \
-		nodejs \
-		npm \
 		tzdata \
 		ninja-build \
 		gettext \
@@ -44,9 +42,22 @@ RUN set -eux; \
 		cmake \
 		gcc \
 		g++ \
+		gdb \
 		pkg-config \
 		zip \
 		unzip
+
+# Install nvm to manage node installation
+RUN set -eux; \
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash; \
+	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"; \
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
+	[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Install latest node and npm
+RUN set -eux; \
+	nvm install node; \
+	nvm install-latest-npm
 
 # Python plugins for Nvim + msgpack-rpc API scripting for Nvim processes
 RUN pip3 install pynvim
@@ -59,7 +70,7 @@ RUN set -eux; \
 	mkdir -p /root/tmp; \
 	cd /root/tmp; \
 	git clone https://github.com/neovim/neovim; \
-	cd /root/tmp/newvim; \
+	cd /root/tmp/neovim; \
 	git checkout stable; \
 	nproc="$( nproc )"; \
 	make -j${nproc}; \
