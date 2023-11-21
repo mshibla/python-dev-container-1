@@ -186,8 +186,8 @@ RUN mkdir -p /root/workspace
 # Set the working directory in the container to workspace
 WORKDIR /root/workspace
 
-# add current directory contents into the container at /app
-ADD ./workspace /root/workspace
+# add current directory contents into the container
+# ADD ./workspace /root/workspace
 
 # CMD ["python3"]
 
