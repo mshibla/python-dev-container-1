@@ -189,7 +189,7 @@ WORKDIR /root/workspace
 # add current directory contents into the container at /app
 ADD ./workspace /root/workspace
 
-CMD ["python3"]
+# CMD ["python3"]
 
 # Best current practices:
 # 1.  Keep your Dockerfiles lean and efficient.  Avoid installing unnecessary packages and clean up after yourself to
