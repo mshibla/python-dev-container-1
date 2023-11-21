@@ -68,7 +68,7 @@ RUN set -eux; \
 
 # Neovim spell check dictionaries
 RUN mkdir -p /root/.local/share/nvim/site/spell
-COPY ./spell/ /root/.local/share/nvim/site/spell/
+# COPY ./spell/ /root/.local/share/nvim/site/spell/
 
 # Install vim-plug
 RUN curl -fLo /root/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
