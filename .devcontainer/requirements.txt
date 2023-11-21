@@ -19,7 +19,6 @@ django-guardian >= 1.1.1
 djangorestframework-simplejwt >= 5.1.0
 click >= 8.0.1
 SQLAlchemy >= 2.0.0
-SQLAlchemy-Unchained == 0.12.2
 alembic >= 1.12.1
 alembic-enums >= 0.4.1
 pytest-alembic >= 0.10.7
@@ -40,7 +39,6 @@ Pygments >= 2.4.0
 gevent >= 23.9.1
 gunicorn >= 21.2.0
 greenlet >= 3.0.1
-asyncio-gevent == 0.2.3
 eventlet >= 0.33.3
 Jinja2 >= 3.1.2
 jinja2-time == 0.2.0

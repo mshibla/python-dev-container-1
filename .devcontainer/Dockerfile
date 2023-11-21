@@ -10,7 +10,7 @@ ENV TZ=America/New_York
 EXPOSE 8080 8081 8082 8083 8084 8085
 
 # Define Neovim COC (command completion) extensions to be installed
-ARG COC='coc-css coc-cssmodules coc-docker coc-fzf-preview coc-git coc-html coc-htmldjango coc-jedi coc-json coc-lua coc-markdownlint coc-perl coc-powershell coc-pydocstring coc-pylsp coc-sh coc-sql coc-swagger coc-tsserver coc-xml coc-yaml'
+ARG COC='coc-css coc-cssmodules coc-docker coc-fzf-preview coc-git coc-html coc-htmldjango coc-jedi coc-json coc-lua coc-markdownlint coc-perl coc-powershell coc-pydocstring coc-sh coc-sql coc-swagger coc-tsserver coc-xml coc-yaml'
 
 # We'll use Lazygit: here are configs
 ARG LG='lazygit'
@@ -19,6 +19,9 @@ ARG LG_ARCHIVE='lazygit.tar.gz'
 
 # We'll use python-3.12.0
 ARG PYTHON_VERSION='3.12.0'
+
+# Bash aliases
+COPY ./home/ /root/
 
 # Update repos and install software
 RUN set -eux; \
@@ -40,26 +43,13 @@ RUN set -eux; \
 		autoconf \
 		automake \
 		cmake \
-		sed \
+		npm \
 		gcc \
 		g++ \
 		gdb \
 		pkg-config \
 		zip \
 		unzip
-
-# Install nvm to manage node installation
-RUN set -eux; \
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash; \
-	export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"; \
-	[ -s "$NVM_DIR/nvm.sh" ] && sed -i '/NVM_SCRIPT_SOURCE/s/$_/bash/' "$NVM_DIR/nvm.sh"; \
-	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
-	[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# Install latest node and npm
-RUN set -eux; \
-	nvm install node; \
-	nvm install-latest-npm
 
 # Python plugins for Nvim + msgpack-rpc API scripting for Nvim processes
 RUN pip3 install pynvim
@@ -100,9 +90,6 @@ RUN set -eux; \
 	tar xzvf $LG_ARCHIVE; \
 	mv $LG /usr/bin/; \
 	rm -rf /root/tmp
-
-# Bash aliases
-COPY ./home/ /root/
 
 # Install python
 ENV PATH /usr/local/bin:$PATH
