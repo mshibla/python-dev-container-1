@@ -10,7 +10,7 @@ ENV TZ=America/New_York
 EXPOSE 8080 8081 8082 8083 8084 8085
 
 # Define Neovim COC (command completion) extensions to be installed
-ARG COC='coc-css coc-cssmodules coc-docker coc-fzf-preview coc-git coc-html coc-htmldjango coc-jedi coc-json coc-lua coc-markdownlint coc-perl coc-powershell coc-pydocstring coc-pylsp coc-sh coc-sql coc-swagger coc-tsserver coc-xml coc-yaml
+ARG COC='coc-css coc-cssmodules coc-docker coc-fzf-preview coc-git coc-html coc-htmldjango coc-jedi coc-json coc-lua coc-markdownlint coc-perl coc-powershell coc-pydocstring coc-pylsp coc-sh coc-sql coc-swagger coc-tsserver coc-xml coc-yaml'
 
 # We'll use Lazygit: here are configs
 ARG LG='lazygit'
