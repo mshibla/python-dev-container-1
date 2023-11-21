@@ -120,7 +120,7 @@ RUN set -eux; \
 	LDFLAGS="$( dpkg-buildflags --get LDFLAGS )"; \
 	make -j "$nproc" \
 		"EXTRA_CFLAGS=${EXTRA_CFLAGS:-}" \
-		"LDFLAGS=${LDFLAGS:-} \
+		"LDFLAGS=${LDFLAGS:-}" \
 		"PROFILE_TASK=${PROFILE_TASK:-}" \
 	; \
 # prevent accidental usage of a system installed libpython of the same version
