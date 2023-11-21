@@ -176,7 +176,7 @@ RUN set -eux; \
 
 
 # Install any needed packages specified in requirements.txt
-mkdir -p /root/tmp
+RUN mkdir -p /root/tmp
 COPY ./requirements.txt /root/tmp/
 RUN test -f /root/tmp/requirements.txt && pip3 install --trusted-host pypi.python.org -r /root/tmp/requirements.txt
 
