@@ -138,7 +138,7 @@ RUN set -eux; \
 	dir="$( dirname "$bin")"; \
 	mkdir -p "/usr/share/gdb/auto-load/$dir"; \
 	cp -vL Tools/gdb/libpython.py "/usr/share/gdb/auto-load/$bin-gdb.py"; \
-	cd /;
+	cd /; \
 	rm -rf /usr/src/python; \
 	find /usr/local -depth \
 		\( \
