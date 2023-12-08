@@ -2,5 +2,8 @@
   "name": "Python Dev Container 1",
   "build": {
     "dockerfile": "Dockerfile"
-  }
+  },
+  "mounts: [
+    "source=/home/mshibla/workspace,target=${containerWorkspaceFolder}/workspace,type=bind,consistency=cached"
+  ]
 }

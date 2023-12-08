@@ -1,5 +1,6 @@
 # Use an official Python runtime as parent image
-FROM buildpack-deps:22.04
+# FROM buildpack-deps:22.04
+FROM ubuntu:22.04
 
 # Set image locale
 ENV LANG en_US.UTF-8
@@ -20,45 +21,79 @@ ARG LG_ARCHIVE='lazygit.tar.gz'
 # We'll use python-3.12.0
 ARG PYTHON_VERSION='3.12.0'
 
+# Create directory for projects
+RUN mkdir -p /app/workspace
+
+# Set the working directory in the container to workspace
+WORKDIR /app
+RUN echo > /app/workspace/build.log
+
 # Bash aliases
 COPY ./home/ /root/
 
 # Update repos and install software
 RUN set -eux; \
-	apt-get update; \
+	echo "Update repos and install software" >> /app/workspace/build.log; \
+	apt-get update 2>&1 | tee /app/workspace/build.log; \
 	apt-get -y install \
+		bash \
 		curl \
 		fzf \
 		ripgrep \
 		tree \
 		git \
 		xclip \
+		tzdata \
 		python3 \
 		python3-pip \
-		tzdata \
 		ninja-build \
 		gettext \
+		libexpat1-dev \
 		libtool \
 		libtool-bin \
 		autoconf \
 		automake \
 		cmake \
-		npm \
+		sed \
 		gcc \
 		g++ \
 		gdb \
 		pkg-config \
 		zip \
-		unzip
+		unzip \
+		2>&1 | tee /app/workspace/build.log
+
+# Install nvm
+SHELL ["/bin/bash", "-c"]
+ENV NVM_DIR="/root/.nvm"
+RUN set -eux; \
+	echo "Install nvm" >> /app/workspace/build.log; \
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash; \
+	[ -s "$NVM_DIR/nvm.sh" ] && sed -i '/NVM_SCRIPT_SOURCE/s/$_/bash/' "$NVM_DIR/nvm.sh"; \
+	echo done | tee /app/workspace/build.log
+
+# Install node and npm
+RUN set -eux; \
+	echo "Install node and npm" >> /app/workspace/build.log; \
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
+	[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"; \
+	nvm install node 2>&1 | tee /app/workspace/build.log; \
+	nvm install-latest-npm 2>&1 | tee /app/workspace/build.log
 
 # Python plugins for Nvim + msgpack-rpc API scripting for Nvim processes
-RUN pip3 install pynvim
+RUN set -eux; \
+	echo "Install plugins for Nvim" >> /app/workspace/build.log; \
+	pip3 install pynvim 2>&1 | tee /app/workspace/build.log
 
 # NodeJS package manager tie-in with Nvim
-RUN npm i -g neovim
+RUN set -eux; \
+	echo "Install NodeJS package manager tie-in with Nvim" >> /app/workspace/build.log; \
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
+	npm i -g neovim 2>&1 | tee /app/workspace/build.log
 
 # Neovim
 RUN set -eux; \
+	echo "Install Nvim" >> /app/workspace/build.log; \
 	mkdir -p /root/tmp; \
 	cd /root/tmp; \
 	git clone https://github.com/neovim/neovim; \
@@ -74,16 +109,21 @@ RUN mkdir -p /root/.local/share/nvim/site/spell
 # COPY ./spell/ /root/.local/share/nvim/site/spell/
 
 # Install vim-plug
-RUN curl -fLo /root/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+RUN set -eux; \
+	echo "Install vim-plug" >> /app/workspace/build.log; \
+	curl -fLo /root/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # COC extensions
 RUN set -eux; \
+	echo "Install COC extensions" >> /app/workspace/build.log; \
 	mkdir -p /root/.config/coc/extensions; \
 	cd /root/.config/coc/extensions; \
-	npm install $COC --global --only=prod
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"; \
+	npm install $COC --global --only=prod 2>&1 | tee /app/workspace/build.log
 
 # Lazygit
 RUN set -eux; \
+	echo "Install Lazygit" >> /app/workspace/build.log; \
 	mkdir -p /root/tmp; \
 	cd /root/tmp; \
 	curl -L -o $LG_ARCHIVE $LG_GITHUB; \
@@ -95,8 +135,9 @@ RUN set -eux; \
 ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
 RUN set -eux; \
+	echo "Install python" >> /app/workspace/build.log; \
 	apt-get install -y --no-install-recommends libbluetooth-dev tk-dev uuid-dev; \
-	rm -rf f/var/lib/apt/lists/*; \
+	rm -rf /var/lib/apt/lists/*; \
 	mkdir -p /root/tmp; \
 	cd /root/tmp; \
 	curl -L -o python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \
@@ -147,13 +188,14 @@ RUN set -eux; \
 		\) -exec rm -rf '{}' + \
 	; \
 	ldconfig; \
-	python3 --version
+	python3 --version | tee -a /app/workspace/build.log
 
 # set LANG back to our preferred locale after building python
 ENV LANG en_US.UTF-8
 
 # make some useful symlinks that are expected to exist
 RUN set -eux; \
+	echo "make symlinks" >> /app/workspace/build.log; \
 	for src in idle3 pydoc3 python3 python3-config; do \
 		dst="$( echo "$src" | tr -d 3 )"; \
 		[ -s "/usr/local/bin/$src" ]; \
@@ -163,6 +205,7 @@ RUN set -eux; \
 
 ENV PYTHON_PIP_VERSION 23.3.1
 RUN set -eux; \
+	echo "Install pip" >> /app/workspace/build.log; \
 	curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py; \
 	export PYTHONDONTWRITEBYTECODE=1; \
 	python get-pip.py  \
@@ -172,19 +215,15 @@ RUN set -eux; \
 		"pip==$PYTHON_PIP_VERSION" \
 	; \
 	rm -f get-pip.py; \
-	pip --version
+	pip --version | tee /app/workspace/build.log
 
 
 # Install any needed packages specified in requirements.txt
 RUN mkdir -p /root/tmp
 COPY ./requirements.txt /root/tmp/
-RUN test -f /root/tmp/requirements.txt && pip3 install --trusted-host pypi.python.org -r /root/tmp/requirements.txt
-
-# Create directory for projects
-RUN mkdir -p /root/workspace
-
-# Set the working directory in the container to workspace
-WORKDIR /root/workspace
+RUN set -eux; \
+	echo "Install packages from requirements.txt" >> /app/workspace/build.log; \
+	test -f /root/tmp/requirements.txt && pip3 install --trusted-host pypi.python.org -r /root/tmp/requirements.txt 2>&1 | tee /app/workspace/build.log
 
 # add current directory contents into the container
 # ADD ./workspace /root/workspace
