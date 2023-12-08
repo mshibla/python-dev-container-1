@@ -43,7 +43,6 @@ RUN set -eux; \
 		tree \
 		git \
 		xclip \
-		tzdata \
 		python3 \
 		python3-pip \
 		ninja-build \
